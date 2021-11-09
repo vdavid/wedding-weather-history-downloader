@@ -14,10 +14,10 @@ const endYear = 2021;
 const weatherDataFolderPath = 'data/raw-weather-data/';
 
 if (action === actions.step1DownloadData) {
-    const dataDownloader = new DataDownloader();
-    await dataDownloader.downloadData(startYear, endYear, weatherDataFolderPath)
+    const dataDownloader = new DataDownloader(weatherDataFolderPath);
+    await dataDownloader.downloadData(startYear, endYear)
 
 } else if (action === actions.step2ParseResults) {
-    const dataParser = new DataParser();
+    const dataParser = new DataParser(weatherDataFolderPath);
     await dataParser.parseData(startYear, endYear);
 }

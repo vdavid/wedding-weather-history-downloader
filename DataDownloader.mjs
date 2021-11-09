@@ -3,11 +3,12 @@ import MeteoStatInterface from './MeteoStatInterface.mjs';
 import config from './config.mjs';
 
 export default class DataDownloader {
-    constructor(meteoStatInterface) {
+    constructor(weatherDataFolderPath, meteoStatInterface) {
+        this.weatherDataFolderPath = weatherDataFolderPath;
         this.meteoStatInterface = meteoStatInterface || new MeteoStatInterface();
     }
 
-    async downloadData(startYear, endYear, targetFolderRelativePath) {
+    async downloadData(startYear, endYear) {
         const losiMajorCoordinates = {
             latitude: 47.8326126,
             longitude: 19.0728598,
@@ -21,7 +22,7 @@ export default class DataDownloader {
                 endDateString: `${year}-09-30`,
             };
             const response = await this.meteoStatInterface.callApi(meteoStatApiArguments, config.apiKey);
-            await this.writeResultToFile(meteoStatApiArguments.startDateString, meteoStatApiArguments.endDateString, response, targetFolderRelativePath);
+            await this.writeResultToFile(meteoStatApiArguments.startDateString, meteoStatApiArguments.endDateString, response, this.weatherDataFolderPath);
         }
     }
 

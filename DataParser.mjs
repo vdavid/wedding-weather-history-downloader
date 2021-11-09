@@ -1,18 +1,23 @@
 import fs from 'fs';
 
 export default class DataParser {
+    constructor(weatherDataFolderPath) {
+        this.weatherDataFolderPath = weatherDataFolderPath;
+    }
     async parseData(startYear, endYear) {
         const years = Array.from(new Array(endYear - startYear + 1), (_item, key) => startYear + key);
-        const temperatureMinimumData = await Promise.all(years.map(year => this.getDataForYear(year, this.temperatureMinimumMapper.bind(this))));
-        await this.writeData(temperatureMinimumData, years, 'data/temperatureMinimums.csv');
-        const temperatureMaximumData = await Promise.all(years.map(year => this.getDataForYear(year, this.temperatureMaximumMapper.bind(this))));
-        await this.writeData(temperatureMaximumData, years, 'data/temperatureMaximums.csv');
-        const rainfallData = await Promise.all(years.map(year => this.getDataForYear(year, this.rainfallMapper.bind(this))));
-        await this.writeData(rainfallData, years, 'data/rainfall.csv');
-        const windSpeedAverageData = await Promise.all(years.map(year => this.getDataForYear(year, this.windSpeedAverageMapper.bind(this))));
-        await this.writeData(windSpeedAverageData, years, 'data/windSpeedAverage.csv');
-        const windSpeedMaximumData = await Promise.all(years.map(year => this.getDataForYear(year, this.windSpeedMaximumMapper.bind(this))));
-        await this.writeData(windSpeedMaximumData, years, 'data/windSpeedMaximum.csv');
+        const weatherDataForYears = await Promise.all(years.map(year => this.loadWeatherData(year)));
+        await this.parseOneAspect(years, weatherDataForYears, this.temperatureMinimumMapper.bind(this), 'data/temperatureMinimums.csv');
+        await this.parseOneAspect(years, weatherDataForYears, this.temperatureMaximumMapper.bind(this), 'data/temperatureMaximums.csv');
+        await this.parseOneAspect(years, weatherDataForYears, this.temperatureDaytimeAverageMapper.bind(this), 'data/temperatureDaytimeAverage.csv');
+        await this.parseOneAspect(years, weatherDataForYears, this.rainfallMapper.bind(this), 'data/rainfall.csv');
+        await this.parseOneAspect(years, weatherDataForYears, this.windSpeedAverageMapper.bind(this), 'data/windSpeedAverage.csv');
+        await this.parseOneAspect(years, weatherDataForYears, this.windSpeedMaximumMapper.bind(this), 'data/windSpeedMaximum.csv');
+    }
+
+    async parseOneAspect(years, weatherDataForYears, mapper, fileName) {
+        const data = await Promise.all(years.map((year, index) => this.getDataForYear(year, weatherDataForYears[index], mapper.bind(this))));
+        await this.writeData(data, years, fileName);
     }
 
     async writeData(data, years, filePath) {
@@ -28,8 +33,7 @@ export default class DataParser {
         await fs.promises.writeFile(filePath, csvColumnHeaders + '\n' + csvData);
     }
 
-    async getDataForYear(year, mapperFunction) {
-        const weatherData = await this.loadWeatherData(year);
+    async getDataForYear(year, weatherData, mapperFunction) {
         const entries = weatherData.data;
         const days = {};
         entries.forEach(entry => {
@@ -48,9 +52,14 @@ export default class DataParser {
         return entries.reduce((maximum, entry) => ((entry.temp !== null) && (entry.temp > maximum)) ? entry.temp : maximum, -Infinity);
     }
 
+    temperatureDaytimeAverageMapper(entries) {
+        const count = entries.slice(9, 21).filter(entry => entry.temp !== null).length;
+        return entries.slice(9, 21).reduce((sum, entry) => sum + entry.temp, 0) / count;
+    }
+
     windSpeedAverageMapper(entries) {
         const count = entries.filter(entry => entry.wspd !== null).length;
-        return entries.reduce((windspeed, entry) => windspeed + entry.wspd, 0) / count;
+        return entries.reduce((sum, entry) => sum + entry.wspd, 0) / count;
     }
 
     rainfallMapper(entries) {
@@ -62,7 +71,7 @@ export default class DataParser {
     }
 
     async loadWeatherData(year) {
-        const filePath = `${weatherDataFolderPath}${year}-09-01_${year}-09-30.json`;
+        const filePath = `${this.weatherDataFolderPath}${year}-09-01_${year}-09-30.json`;
         const fileContent = await fs.promises.readFile(filePath, 'utf-8');
         return JSON.parse(fileContent);
     }
