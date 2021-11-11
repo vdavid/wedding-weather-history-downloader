@@ -15,4 +15,9 @@ It can be used for other POIs too, but it only handles September 😃
  - Node.js (v14.16.0)
  - TypeScript
  - [Next.js](https://nextjs.org/) (bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app))
- 
+
+## Links
+- MeteoStat Docs (elaborate): https://dev.meteostat.net/api/point/hourly.html#endpoint
+- MeteoStat Docs (fancy): https://rapidapi.com/meteostat/api/meteostat/
+- Pricing: https://rapidapi.com/meteostat/api/meteostat/pricing
+  - 500 requests / month are free, 3 requests per second are allowed.
