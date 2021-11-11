@@ -1,5 +1,7 @@
 .main { max-width:1024px; padding: 4rem 0; margin:0 auto; }
 .main fieldset .grid { display: grid; grid-template-columns:50% 50%; }
 .main fieldset label { display:block; }
-.main fieldset input { margin-bottom: 1em; }
+.main fieldset input { }
 .main fieldset button {margin-top: 1em; }
+.inputWithLabel > p { margin: 0; color: #000a; }
+.inputWithLabel > :last-child { margin-bottom: 1em; }
