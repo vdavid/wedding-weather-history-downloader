@@ -30,7 +30,7 @@ export default class DataParser {
 
     private async writeData(dataPerYearPerDay: number[][], years: number[], filePath: string): Promise<void> {
         const dayIndexes = Array.from(new Array(this.endDayIndex - this.startDayIndex + 1), (_item, key) => this.startDayIndex + key);
-        const csvColumnHeaders = ['', ...dayIndexes.map(dayIndex => DataParser.getIsoDateStringFromDate(DataParser.createDateFromYearAndDay(years[0], dayIndex)).slice(5))].join(',');
+        const csvColumnHeaders = ['', ...dayIndexes.map(dayIndex => DataParser.getIsoDateStringFromDate(DataParser.createDateFromYearAndDay(years[0], dayIndex + 1)).slice(5))].join(',');
         const csvRows: string[] = dataPerYearPerDay.reduce((result: string[], row) => {
             result.push(row.join(','));
             return result;
@@ -49,7 +49,7 @@ export default class DataParser {
             days[dateString] = days[dateString] || [];
             days[dateString].push(entry)
         });
-        const requiredDays = DataParser.sliceObject(days, this.startDayIndex, this.endDayIndex);
+        const requiredDays = DataParser.sliceObject(days, this.startDayIndex, this.endDayIndex + 1);
 
         /* Aggregate entries for each day */
         return Object.values(requiredDays).map(mapperFunction);

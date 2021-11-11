@@ -12,8 +12,8 @@ export default function Step2Parse() {
         <p>Make sure you download the data for the desired years first.</p>
         <fieldset>
             <div className={styles.grid}>
-                <SavedInputWithLabel id="startYear" label="Start year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setStartYear(event.target.value)}/>
-                <SavedInputWithLabel id="endYear" label="End year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setEndYear(event.target.value)}/>
+                <SavedInputWithLabel id="step2StartYear" label="Start year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setStartYear(event.target.value)}/>
+                <SavedInputWithLabel id="step2EndYear" label="End year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setEndYear(event.target.value)}/>
             </div>
             <button onClick={start}>Parse</button>
         </fieldset>

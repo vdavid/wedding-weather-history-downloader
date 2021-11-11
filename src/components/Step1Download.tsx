@@ -18,11 +18,11 @@ export default function Step1Download() {
             Data for each year are stored in separate files, and previously downloaded data won‘t be deleted, so you can mix and match the years you need.</p>
         <fieldset>
             <div className={styles.grid}>
-                <SavedInputWithLabel id="startYear" label="Start year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setStartYear(event.target.value)}/>
-                <SavedInputWithLabel id="endYear" label="End year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setEndYear(event.target.value)}/>
-                <SavedInputWithLabel id="latitude" label="Latitude" description="In degrees. Must be between -90 and 90." isRequired={true} onChange={(event) => setLatitude(event.target.value)}/>
-                <SavedInputWithLabel id="longitude" label="Longitude" description="In degrees. Must be between -180 and 180." isRequired={true} onChange={(event) => setLongitude(event.target.value)}/>
-                <SavedInputWithLabel id="altitudeInMeters" label="Altitude" description="In meters, below 10,000." isRequired={false} maxLength={4} onChange={(event) => setAltitudeInMeters(event.target.value)}/>
+                <SavedInputWithLabel id="step1StartYear" label="Start year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setStartYear(event.target.value)}/>
+                <SavedInputWithLabel id="step1EndYear" label="End year" description="Must be between 1979 and the current year." isRequired={true} maxLength={4} onChange={(event) => setEndYear(event.target.value)}/>
+                <SavedInputWithLabel id="step1Latitude" label="Latitude" description="In degrees. Must be between -90 and 90." isRequired={true} onChange={(event) => setLatitude(event.target.value)}/>
+                <SavedInputWithLabel id="step1Longitude" label="Longitude" description="In degrees. Must be between -180 and 180." isRequired={true} onChange={(event) => setLongitude(event.target.value)}/>
+                <SavedInputWithLabel id="step1AltitudeInMeters" label="Altitude" description="In meters, below 10,000." isRequired={false} maxLength={4} onChange={(event) => setAltitudeInMeters(event.target.value)}/>
             </div>
             <p>{requestCount
                 ? <>{requestCount} requests will be made in an estimated {Math.floor(requestCount / (config.maximumRequestsPerSecond - 1))} seconds.< br/>
