@@ -16,7 +16,7 @@ const Home: NextPage = () => {
 
             <main className={styles.main}>
                 <h1 className={styles.title}>Weather history downloader</h1>
-                <p>In this current version, this tool downloads weather data for September only.</p>
+                <p>Note: This tool downloads weather data for the whole year(s), but only parses the date range that's set in the config.</p>
                 <Step1Download />
                 <Step2Parse />
             </main>

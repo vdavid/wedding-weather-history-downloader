@@ -3,10 +3,15 @@ import {MeteoStatApiRawResponseDailyData, MeteoStatRawApiResponse} from './types
 
 export default class DataParser {
     private readonly weatherDataFolderPath: string;
+    private readonly startDayIndex: number;
+    private readonly endDayIndex: number;
 
-    constructor(weatherDataFolderPath: string) {
+    constructor(weatherDataFolderPath: string, startDayIndex: number, endDayIndex: number) {
         this.weatherDataFolderPath = weatherDataFolderPath;
+        this.startDayIndex = startDayIndex;
+        this.endDayIndex = endDayIndex;
     }
+
     async parseData(startYear: number, endYear: number): Promise<void> {
         const years = Array.from(new Array(endYear - startYear + 1), (_item, key) => startYear + key);
         const weatherDataForYears = await Promise.all(years.map(year => this.loadWeatherData(year)));
@@ -18,15 +23,15 @@ export default class DataParser {
         await this.parseOneAspect(years, weatherDataForYears, this.getMaximumWindSpeed.bind(this), 'data/windSpeedMaximum.csv');
     }
 
-    async parseOneAspect(years: number[], weatherDataForYears: MeteoStatRawApiResponse[], aggregatorFunction: DayAggregator, fileName: string): Promise<void> {
-        const data: number[][] = await Promise.all(years.map((year, index) => this.getDataForYear(year, weatherDataForYears[index], aggregatorFunction.bind(this))));
-        await this.writeData(data, years, fileName);
+    private async parseOneAspect(years: number[], weatherDataForYears: MeteoStatRawApiResponse[], aggregatorFunction: DayAggregator, fileName: string): Promise<void> {
+        const dataPerYearPerDay: number[][] = await Promise.all(years.map((year, index) => this.aggregateDataForDays(weatherDataForYears[index], aggregatorFunction.bind(this))));
+        await this.writeData(dataPerYearPerDay, years, fileName);
     }
 
-    async writeData(data: number[][], years: number[], filePath: string): Promise<void> {
-        const days = Array.from(new Array(30), (_item, key) => key + 1);
-        const csvColumnHeaders = ['', ...days].join(',');
-        const csvRows: string[] = data.reduce((result: string[], row) => {
+    private async writeData(dataPerYearPerDay: number[][], years: number[], filePath: string): Promise<void> {
+        const dayIndexes = Array.from(new Array(this.endDayIndex - this.startDayIndex + 1), (_item, key) => this.startDayIndex + key);
+        const csvColumnHeaders = ['', ...dayIndexes.map(dayIndex => DataParser.getIsoDateStringFromDate(DataParser.createDateFromYearAndDay(years[0], dayIndex)).slice(5))].join(',');
+        const csvRows: string[] = dataPerYearPerDay.reduce((result: string[], row) => {
             result.push(row.join(','));
             return result;
         }, []);
@@ -36,15 +41,18 @@ export default class DataParser {
         await fs.promises.writeFile(filePath, csvColumnHeaders + '\n' + csvData);
     }
 
-    async getDataForYear(year: number, weatherData: MeteoStatRawApiResponse, mapperFunction: DayAggregator): Promise<number[]> {
-        const entries = weatherData.data;
+    private async aggregateDataForDays(weatherData: MeteoStatRawApiResponse, mapperFunction: DayAggregator): Promise<number[]> {
+        /* Group entries by days */
         const days: {[key: string]: MeteoStatApiRawResponseDailyData[]} = {};
-        entries.forEach(entry => {
+        weatherData.data.forEach(entry => {
             const dateString = entry.time.substring(0, 10);
             days[dateString] = days[dateString] || [];
             days[dateString].push(entry)
         });
-        return Object.values(days).map(mapperFunction);
+        const requiredDays = DataParser.sliceObject(days, this.startDayIndex, this.endDayIndex);
+
+        /* Aggregate entries for each day */
+        return Object.values(requiredDays).map(mapperFunction);
     }
 
     private getMinimumTemperature: DayAggregator = (entries) => {
@@ -73,12 +81,27 @@ export default class DataParser {
         return entries.reduce((maximum, entry) => ((entry.wspd !== null) && (entry.wspd > maximum)) ? entry.wspd : maximum, -Infinity);
     }
 
-    async loadWeatherData(year: number): Promise<MeteoStatRawApiResponse> {
-        const filePath = `${this.weatherDataFolderPath}${year}-09-01_${year}-09-30.json`;
+    private async loadWeatherData(year: number): Promise<MeteoStatRawApiResponse> {
+        const filePath = `${this.weatherDataFolderPath}${year}-01-01_${year}-12-31.json`;
         const fileContent = await fs.promises.readFile(filePath, 'utf-8');
         return JSON.parse(fileContent);
     }
 
+    private static createDateFromYearAndDay(year: number, dayIndex: number) {
+        return new Date(year, 0, dayIndex);
+    }
+
+    private static sliceObject<T>(object: {[key: string]: T}, startIndex: number, endIndex: number): {[key: string]: T} {
+        return Object.keys(object).slice(startIndex, endIndex).reduce<{[key: string]: T}>((result, key) => {
+            result[key] = object[key];
+
+            return result;
+        }, {});
+    }
+
+    private static getIsoDateStringFromDate(date: Date) {
+        return date.getFullYear()+'-' + (date.getMonth() + 1).toString().padStart(2, '0') + '-' + date.getDate().toString().padStart(2, '0')
+    }
 }
 
 type DayAggregator = (entries: MeteoStatApiRawResponseDailyData[]) => number;

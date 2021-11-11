@@ -35,11 +35,11 @@ export default async function handler(request: NextApiRequest, response: NextApi
         try {
             /* Perform download and saving to file */
             const dataDownloader = new DataDownloader(config.weatherDataFolderPath);
-            await dataDownloader.downloadDataAndSaveToFile(
+            const requestCount = await dataDownloader.downloadDataAndSaveToFile(
                 {startYear, endYear, latitude, longitude, altitudeInMeters});
 
             /* Send output */
-            response.status(200).json({success: true, message: `Downloaded data for ${endYear - startYear + 1} years.`});
+            response.status(200).json({success: true, message: `Downloaded data for ${endYear - startYear + 1} years in ${requestCount} requests.`});
         } catch (error: any) {
             console.log(error);
             response.status(500).json({success: false, message: error.message});
@@ -47,6 +47,6 @@ export default async function handler(request: NextApiRequest, response: NextApi
     }
 }
 
-function parseNumberInput(input: string | string[]): number | undefined {
-    return !(input === undefined || input === '') ? parseFloat(typeof input === 'string' ? input : input[0]) : undefined;
+function parseNumberInput(input: number | string | string[]): number | undefined {
+    return !(input === undefined || input === '') ? (typeof input === 'number' ? input : parseFloat(typeof input === 'string' ? input : input[0])) : undefined;
 }

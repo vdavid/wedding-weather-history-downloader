@@ -9,6 +9,9 @@ type Response = {
 }
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse<Response>) {
+    const startDayIndex = config.startDayIndex;
+    const endDayIndex = config.endDayIndex;
+
     /* Parse input */
     const startYear = parseNumberInput(request.body.startYear);
     const endYear = parseNumberInput(request.body.endYear);
@@ -24,7 +27,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
         response.status(400).json({success: false, message: 'End year must be greater than start year.'});
     } else {
         try {
-            const dataParser = new DataParser(config.weatherDataFolderPath);
+            const dataParser = new DataParser(config.weatherDataFolderPath, startDayIndex, endDayIndex);
             await dataParser.parseData(startYear, endYear);
 
             /* Send output */

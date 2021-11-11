@@ -1,6 +1,7 @@
 import styles from '../../styles/Home.module.css';
 import SavedInputWithLabel from './SavedInputWithLabel';
 import {MouseEvent, useState} from 'react';
+import config from '../config';
 
 export default function Step1Download() {
     const [startYear, setStartYear] = useState<string>();
@@ -9,6 +10,7 @@ export default function Step1Download() {
     const [longitude, setLongitude] = useState<string>();
     const [altitudeInMeters, setAltitudeInMeters] = useState<string>();
     const [status, setStatus] = useState<string>();
+    const requestCount = (startYear && endYear) ? Math.max(0, (parseInt(endYear) - parseInt(startYear) + 1) * 13) : 0;
 
     return <section>
         <h2>Step 1: Download data</h2>
@@ -22,6 +24,11 @@ export default function Step1Download() {
                 <SavedInputWithLabel id="longitude" label="Longitude" description="In degrees. Must be between -180 and 180." isRequired={true} onChange={(event) => setLongitude(event.target.value)}/>
                 <SavedInputWithLabel id="altitudeInMeters" label="Altitude" description="In meters, below 10,000." isRequired={false} maxLength={4} onChange={(event) => setAltitudeInMeters(event.target.value)}/>
             </div>
+            <p>{requestCount
+                ? <>{requestCount} requests will be made in an estimated {Math.floor(requestCount / (config.maximumRequestsPerSecond - 1))} seconds.< br/>
+                {requestCount > 250 ? <>Note that there are 500 requests / month in the free plan.<br /></> : null}
+                    <a href="https://rapidapi.com/developer/dashboard" target="_blank">See how many requests you have left.</a></>
+                : 'Wrong years given.'}</p>
             <button onClick={start}>Download</button>
         </fieldset>
         <div>{status}</div>

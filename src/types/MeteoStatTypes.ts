@@ -16,7 +16,7 @@ export type MeteoStatApiArguments = {
 };
 
 export type MeteoStatRawApiResponse = {
-    metadata: MeteoStatRawApiResponseMetadata;
+    meta: MeteoStatRawApiResponseMetadata;
     data: MeteoStatApiRawResponseDailyData[];
 };
 
