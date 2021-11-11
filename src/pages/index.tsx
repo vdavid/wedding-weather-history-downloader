@@ -106,7 +106,6 @@ const Home: NextPage = () => {
             }
         } else {
             document.getElementById('parsingStatus')!.innerText = 'Communication error ' + response.status + ': ' + await response.text();
-            console.log(response);
         }
         // @ts-ignore
         event.target.disabled = false;
